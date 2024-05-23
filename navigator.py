@@ -33,16 +33,18 @@ class FlightGraph:
         self.graph = nx.Graph()
         self.coordinates = {}
         self.weather_api_key = 'b21a2633ddaac750a77524f91fe104e7'
-        self.routes_file = 'datasets/common_data.csv'
+        self.routes_file = 'datasets/routes.csv'
         self.airports_file = 'datasets/Full_Merge_of_All_Unique Airports.csv'
 
     def load_coordinates(self, encoding='utf-8'):
-        with open(self.routes_file, 'r', encoding=encoding) as csvfile:
+        with open(self.airports_file, 'r', encoding=encoding) as csvfile:
             csvreader = csv.reader(csvfile)
             next(csvreader)
             for row in csvreader:
                 self.coordinates[row[1]] = [float(i) for i in row[2:4]]
-        print(self.coordinates)
+                self.coordinates[row[1]].append(row[0])
+
+
     def load_flights(self, encoding='utf-8'):
         flights_df = pd.read_csv(self.routes_file, encoding=encoding)
         
@@ -55,12 +57,12 @@ class FlightGraph:
         #         d.add(row[1])
         
         for index, row in flights_df.iterrows():
-            departure_airport = row[6]
-            arrival_airport = row[8]
+            departure_airport = row[2]
+            arrival_airport = row[4]
             if (departure_airport   not in self.coordinates.keys() or arrival_airport not in self.coordinates.keys()):
                 continue
-            lat1, lon1 = self.coordinates[departure_airport]
-            lat2, lon2 = self.coordinates[arrival_airport]
+            lat1, lon1 = self.coordinates[departure_airport][:2]
+            lat2, lon2 = self.coordinates[arrival_airport][:2]
             distance = HaversineCalculator.calculate(lat1, lon1, lat2, lon2)
             #check (start or end) in birdstrike - > calculate severity
             self.graph.add_edge(departure_airport, arrival_airport, weight=distance)
@@ -147,12 +149,20 @@ class FlightGraph:
      
                 
     def get_coordinates(self,val):
-        return self.coordinates[val]
+        return val in self.coordinates
 
     def find_shortest_path(self, start, end):
-        path = nx.dijkstra_path(self.graph, start, end, weight='weight')
-        # fuel_consumed =nx.dijkstra_path_length(self.graph, start, end, weight='weight')
+
+        if not self.get_coordinates(val=start) or not self.get_coordinates(val=end):
+            return []
+        
+        try:    
+            path = nx.dijkstra_path(self.graph, start, end, weight='weight')
+            # fuel_consumed =nx.dijkstra_path_length(self.graph, start, end, weight='weight')
+        except:
+            path=[]
         return path
+        
 
 class WeatherFetcher:
     @staticmethod
