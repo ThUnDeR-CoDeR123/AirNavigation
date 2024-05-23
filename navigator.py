@@ -45,11 +45,20 @@ class FlightGraph:
         print(self.coordinates)
     def load_flights(self, encoding='utf-8'):
         flights_df = pd.read_csv(self.routes_file, encoding=encoding)
-        l=set()
+        
+        # d=set()
+        # with open('datasets/common_data_new', 'r') as csvfile:
+        #     csvreader = csv.reader(csvfile)
+        #     fields1 = next(csvreader)
+        #     for row in csvreader:
+        #         d.add(row[0])
+        #         d.add(row[1])
+        
         for index, row in flights_df.iterrows():
             departure_airport = row[6]
             arrival_airport = row[8]
-
+            if (departure_airport   not in self.coordinates.keys() or arrival_airport not in self.coordinates.keys()):
+                continue
             lat1, lon1 = self.coordinates[departure_airport]
             lat2, lon2 = self.coordinates[arrival_airport]
             distance = HaversineCalculator.calculate(lat1, lon1, lat2, lon2)
@@ -100,20 +109,17 @@ class FlightGraph:
     def update_weights_based_on_weather(self, airport,destination_airport):
         weather_data = WeatherFetcher.fetch(self.coordinates[airport])
         for edge in self.graph.edges(data=True):
-
-            direction = self.calculate_bearing(self.coordinates[airport],self.coordinates[destination_airport])
-            if 60> abs(direction-weather_data["wind"]["deg"]) >= 0 or 360> abs(direction-weather_data["wind"]["deg"]) >= 300:
+            
+            if (edge[0] == airport or edge[1] == destination_airport) :
+                direction = self.calculate_bearing(self.coordinates[airport],self.coordinates[destination_airport])
+                if 60> abs(direction-weather_data["wind"]["deg"]) >= 0 or 360> abs(direction-weather_data["wind"]["deg"]) >= 300:
                     edge[2]['weight'] *= 0.7
-            elif 300> abs(direction-weather_data["wind"]["deg"]) >= 60:
+                elif 300> abs(direction-weather_data["wind"]["deg"]) >= 60:
                     edge[2]['weight'] *= 1.2
-                    
-            if (edge[0] == airport or edge[1] == airport) :
-
                 #thunderstorm
                 if 300 > weather_data['weather'][0]['id'] >= 200 :
                     edge[2]['weight'] *= 10
 
-                
                 #rain
                 elif 600 > weather_data['weather'][0]['id'] >= 500 :
                     edge[2]['weight'] *= 1.1
