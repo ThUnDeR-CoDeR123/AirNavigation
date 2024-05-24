@@ -99,27 +99,36 @@ class FlightGraph:
         
         return compass_bearing
 
-
-    def update_weights_based_on_weather(self, airport,destination_airport):
+    def update_weights_based_on_weather(self, airport,destination_airport,previous=None):
         weather_data = WeatherFetcher.fetch(self.coordinates[airport])
+        weather_data_destination = WeatherFetcher.fetch(self.coordinates[destination_airport])
         for edge in self.graph.edges(data=True):
             
             if (edge[0] == airport or edge[1] == destination_airport) :
+                #thunderstorm
+
+                if 300 > weather_data['weather'][0]['id'] >= 200 or 300 > weather_data_destination['weather'][0]['id'] >=200:
+                    if not previous:
+                        return "Thunderstorm alert"
+                    
+                
                 direction = self.calculate_bearing(self.coordinates[airport],self.coordinates[destination_airport])
+
                 if 60> abs(direction-weather_data["wind"]["deg"]) >= 0 or 360> abs(direction-weather_data["wind"]["deg"]) >= 300:
                     edge[2]['weight'] *= 0.7
+
+
                 elif 300> abs(direction-weather_data["wind"]["deg"]) >= 60:
                     edge[2]['weight'] *= 1.2
+
 
                 if weather_data["main"]["temp"]>323.15 or weather_data["main"]["temp"]<218.5 :
                     edge[2]['weight'] *= 1.05   
                 
-                #thunderstorm
-                if 300 > weather_data['weather'][0]['id'] >= 200 :
-                    edge[2]['weight'] *= 10
+    
 
                 #rain
-                elif 600 > weather_data['weather'][0]['id'] >= 500 :
+                if 600 > weather_data['weather'][0]['id'] >= 500 :
                     edge[2]['weight'] *= 1.1
                 
                 #snow
@@ -137,20 +146,27 @@ class FlightGraph:
                 elif  weather_data['weather'][0]['id'] == 741 :
                     edge[2]['weight'] *= 1.3
                 
+                #tornado
                 elif  weather_data['weather'][0]['id'] == 781 :
-                    edge[2]['weight'] *= 100
-                
+                    edge[2]['weight'] *= 1000
+                    return "Tornado"
                
-                
+        return ""
      
                 
     def get_coordinates(self,val):
         return val in self.coordinates
 
-    def find_shortest_path(self, start, end):
+    def find_shortest_path(self, start, end,previous=None):
+
+        val=self.update_weights_based_on_weather(start,end,previous)
+        l=[]
+        if val:
+            l.append(val)
+            return l
 
         if not self.get_coordinates(val=start) or not self.get_coordinates(val=end):
-            return []
+            return l
         
         try:    
             path = nx.dijkstra_path(self.graph, start, end, weight='weight')

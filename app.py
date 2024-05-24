@@ -15,15 +15,20 @@ def get_shortest_path():
     try:
         start_airport = request.args.get('start')
         end_airport = request.args.get('end')
+        intermediate_nodes = request.args.get('int')
         print(start_airport,end_airport)
         if not all([start_airport, end_airport]):
             return jsonify({"error": "Please provide start and end parameters"})
         
 
-        flight_graph.update_weights_based_on_weather(start_airport,end_airport)
-        route = flight_graph.find_shortest_path(start_airport, end_airport)
+        
+        route = flight_graph.find_shortest_path(start_airport, end_airport,intermediate_nodes)
+
         if not route:
             return jsonify({"error": f"No path found between {start_airport} and {end_airport}"})
+        if "Tornado" in route or "Thunderstorm alert" in route:
+            return jsonify({"error": f"No Flight Available Because of {route[0]}"})
+        
         print(route)
 
         return jsonify({"route": route})
