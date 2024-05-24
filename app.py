@@ -49,4 +49,4 @@ if __name__ == "__main__":
     flight_graph.load_coordinates()
     flight_graph.load_flights()
 
-    app.run(debug=True,host="0.0.0.0",port=5635)
+    app.run(debug=True,host="0.0.0.0",port=5635,ssl_context=('cert.pem', 'key.pem'))
