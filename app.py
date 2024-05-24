@@ -2,7 +2,7 @@ from navigator import FlightGraph
 from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
 
-
+global flight_graph
 
 app=Flask(__name__)
 cors = CORS(app, support_credentials=True)
@@ -49,4 +49,4 @@ if __name__ == "__main__":
     flight_graph.load_coordinates()
     flight_graph.load_flights()
 
-    app.run(debug=True,host="0.0.0.0",port=5635,ssl_context=('cert.pem', 'key.pem'))
+    app.run(debug=True,host="0.0.0.0",port=5635,ssl_context=('cert.pem','key.pem'))

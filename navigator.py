@@ -168,24 +168,5 @@ class WeatherFetcher:
         weather_response = requests.get(weather_url, params=weather_params)
         return weather_response.json()
 
-# def main(start_airport, end_airport):
-#     weather_api_key = 'b21a2633ddaac750a77524f91fe104e7'
-#     routes_file = 'datasets/routes.csv'
-#     airports_file = 'datasets/Full_Merge_of_All_Unique Airports.csv'
-    
-#     flight_graph.update_weights_based_on_weather(start_airport, weather_api_key)
-#     route = flight_graph.find_shortest_path(start_airport, end_airport)
-#     return route
-
-
-
-# if __name__ == "__main__":
-#     weather_api_key = 'b21a2633ddaac750a77524f91fe104e7'
-#     routes_file = 'datasets/routes.csv'
-#     airports_file = 'datasets/Full_Merge_of_All_Unique Airports.csv'
-#     start_airport = "PHF"
-#     end_airport = "SCO"
-#     route = main(routes_file, airports_file, start_airport, end_airport, weather_api_key)
-#     print(route)
 
 
