@@ -110,6 +110,10 @@ class FlightGraph:
                     edge[2]['weight'] *= 0.7
                 elif 300> abs(direction-weather_data["wind"]["deg"]) >= 60:
                     edge[2]['weight'] *= 1.2
+
+                if weather_data["main"]["temp"]>323.15 or weather_data["main"]["temp"]<218.5 :
+                    edge[2]['weight'] *= 1.05   
+                
                 #thunderstorm
                 if 300 > weather_data['weather'][0]['id'] >= 200 :
                     edge[2]['weight'] *= 10
