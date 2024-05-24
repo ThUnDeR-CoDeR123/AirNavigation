@@ -48,13 +48,7 @@ class FlightGraph:
     def load_flights(self, encoding='utf-8'):
         flights_df = pd.read_csv(self.routes_file, encoding=encoding)
         
-        # d=set()
-        # with open('datasets/common_data_new', 'r') as csvfile:
-        #     csvreader = csv.reader(csvfile)
-        #     fields1 = next(csvreader)
-        #     for row in csvreader:
-        #         d.add(row[0])
-        #         d.add(row[1])
+
         
         for index, row in flights_df.iterrows():
             departure_airport = row[2]
