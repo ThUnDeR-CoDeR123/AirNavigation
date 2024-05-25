@@ -148,7 +148,7 @@ class FlightGraph:
                 
                 #tornado
                 elif  weather_data['weather'][0]['id'] == 781 :
-                    edge[2]['weight'] *= 1000
+                    
                     return "Tornado"
                
         return ""
@@ -159,26 +159,26 @@ class FlightGraph:
 
     def find_shortest_path(self, start, end,previous=None):
 
-        val=self.update_weights_based_on_weather(start,end,previous)
-        l=[]
-        if val:
-            l.append(val)
-            return l
-
+        
         if not self.get_coordinates(val=start) or not self.get_coordinates(val=end):
-            return l
+            return []
+        path1 = nx.dijkstra_path(self.graph, start, end, weight='weight')
+        val=self.update_weights_based_on_weather(start,end,previous)
+        if val:
+            return [val]
         
         try:    
             path = nx.dijkstra_path(self.graph, start, end, weight='weight')
             # fuel_consumed =nx.dijkstra_path_length(self.graph, start, end, weight='weight')
         except:
             path=[]
-        return path
+        # with weather, without weather       
+        return [path,path1]
         
 
 class WeatherFetcher:
     @staticmethod
-    def fetch(coordinate):
+    def fetch(coordinate=None):
         weather_url = "http://api.openweathermap.org/data/2.5/weather"
         weather_params = {'appid': 'b21a2633ddaac750a77524f91fe104e7', 'lat': coordinate[0], 'lon': coordinate[1]}
         weather_response = requests.get(weather_url, params=weather_params)
